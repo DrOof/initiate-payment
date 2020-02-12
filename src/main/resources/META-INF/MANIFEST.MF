@@ -1,0 +1,1 @@
+Main-Class: com.revolut.payment.app.InitiatePaymentApp

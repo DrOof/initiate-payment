@@ -2,14 +2,12 @@
 An initiate payment service
 
 ## Running
-java jar
+`mvn compile exec:java -Dexec.mainClass=com.revolut.payment.app.InitiatePaymentApp`
 
 ## Stack
 - Java 11 (LTS)
 - Spark
 - Guice
-
-## Testing
 - JUnit
 - REST Assured
 
