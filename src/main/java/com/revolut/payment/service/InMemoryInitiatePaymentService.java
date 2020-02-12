@@ -1,6 +1,7 @@
 package com.revolut.payment.service;
 
 import com.revolut.payment.exception.InitiatePaymentNotFoundException;
+import com.revolut.payment.exception.InitiatePaymentUnauthorizedException;
 import com.revolut.payment.model.InitiatePayment;
 import com.revolut.payment.exception.InitiatePaymentIsIdempotentException;
 import com.revolut.payment.task.ProcessFailed;
@@ -47,21 +48,32 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public List<InitiatePayment> read( String userId ) {
-        return ( List<InitiatePayment> ) queue.get( userId );
+    public List<InitiatePayment> read( String userId ) throws InitiatePaymentNotFoundException {
+
+        List<InitiatePayment> result = queue.get( userId );
+
+        if ( result == null ) {
+            throw new InitiatePaymentNotFoundException( null );
+        }
+
+        return result;
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public InitiatePayment read( String userId, String id ) throws InitiatePaymentNotFoundException {
+    public InitiatePayment read( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
 
         InitiatePayment result = null;
         try {
             result = queue.get( userId ).stream().filter( ( event ) -> event.getId().equals( id ) ).findFirst().get();
         } catch ( NoSuchElementException e ) {
             throw new InitiatePaymentNotFoundException( result );
+        }
+
+        if ( !result.getUser().getSub().equals( userId ) ) {
+            throw new InitiatePaymentUnauthorizedException( result );
         }
 
         return result;
@@ -72,7 +84,7 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment update( String userId, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException {
+    public InitiatePayment update( String userId, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
         return update( read( userId, id ), status );
     }
 
@@ -92,7 +104,7 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment delete( String userId, String id ) throws InitiatePaymentNotFoundException {
+    public InitiatePayment delete( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
         return delete( read( userId, id ) );
     }
 

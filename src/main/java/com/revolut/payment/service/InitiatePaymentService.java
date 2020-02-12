@@ -2,6 +2,7 @@ package com.revolut.payment.service;
 
 import com.revolut.payment.exception.InitiatePaymentIsIdempotentException;
 import com.revolut.payment.exception.InitiatePaymentNotFoundException;
+import com.revolut.payment.exception.InitiatePaymentUnauthorizedException;
 import com.revolut.payment.model.InitiatePayment;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface InitiatePaymentService {
      *
      * @return
      */
-    public List<InitiatePayment> read( String userId );
+    public List<InitiatePayment> read( String userId ) throws InitiatePaymentNotFoundException;
 
     /**
      * Read an initiate payment request by id
@@ -28,7 +29,7 @@ public interface InitiatePaymentService {
      * @param id
      * @return
      */
-    public InitiatePayment read( String userId, String id ) throws InitiatePaymentNotFoundException;
+    public InitiatePayment read( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException;
 
     /**
      * Update the status of an initiate payment request by id
@@ -37,7 +38,7 @@ public interface InitiatePaymentService {
      * @param status
      * @return
      */
-    public InitiatePayment update( String userId, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException;
+    public InitiatePayment update( String userId, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException;
 
     /**
      * Remove an initiate payment request by id
@@ -45,6 +46,6 @@ public interface InitiatePaymentService {
      * @param id
      * @return
      */
-    public InitiatePayment delete( String userId, String id ) throws InitiatePaymentNotFoundException;
+    public InitiatePayment delete( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException;
 
 }
