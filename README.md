@@ -6,7 +6,7 @@ An initiate payment service
 `java -jar target/initiate-payment-1.0-SNAPSHOT.jar`
 
 ## Stack
-- Java 11 (LTS)
+- Java 13
 - Spark
 - Guice
 - JUnit
