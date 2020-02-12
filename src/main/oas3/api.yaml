@@ -1,0 +1,200 @@
+openapi: "3.0.2"
+info:
+  version: 1.0.0
+  title: Revolut Initiate Payment
+  license:
+    name: MIT
+paths:
+  /payment:
+    get:
+      summary: Read all initiate payment
+      operationId: handleReadAllInitiatePayment
+      tags:
+        - payments
+      responses:
+        '200':
+          description: Read all initiate payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentList"
+        '401':
+          description: Unauthorised initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+    post:
+      summary: Initiate a payment
+      operationId: handleCreateInitiatePayment
+      tags:
+        - payments
+      parameters:
+        - name: payment
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/InitiatePayment"
+      responses:
+        '200':
+          description: Initiate a payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePayment"
+        '400':
+          description: Idempotent initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+        '401':
+          description: Unauthorised initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+  /payment/{id}:
+    get:
+      summary: Read initiate payment
+      operationId: handleReadInitiatePayment
+      tags:
+        - payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Initiate a payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePayment"
+        '401':
+          description: Unauthorised initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+  /payment/{id}/authorise:
+    put:
+      summary: Authorise initiate payment
+      operationId: handleAuthoriseInitiatePayment
+      tags:
+        - payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authorise initiate payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePayment"
+        '401':
+          description: Unauthorised initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+  /payment/{id}/reject:
+    put:
+      summary: Reject initiate payment
+      operationId: handleRejectInitiatePayment
+      tags:
+        - payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reject initiate payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePayment"
+        '401':
+          description: Unauthorised initiate payment request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InitiatePaymentExceptionMessage"
+
+components:
+  schemas:
+    InitiatePaymentList:
+      type: array
+      items:
+        $ref: "#/components/schemas/InitiatePayment"
+    InitiatePayment:
+      type: object
+      required:
+        - payment
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        payment:
+          $ref: "#/components/schemas/Payment"
+        status:
+          type: string
+        attempts:
+          type: integer
+    Payment:
+      type: object
+      required:
+        - to
+        - from
+        - consignment
+      properties:
+        to:
+          $ref: "#/components/schemas/Account"
+        from:
+          $ref: "#/components/schemas/Account"
+        consignment:
+          $ref: "#/components/schemas/Consignment"
+    Account:
+      type: object
+      required:
+        - currency
+        - name
+        - BBAN
+      properties:
+        currency:
+          type: string
+        name:
+          type: string
+        BBAN:
+          type: string
+    Consignment:
+      type: object
+      required:
+        - currency
+        - amount
+      properties:
+        currency:
+          type: string
+        amount:
+          type: integer
+    User:
+      type: object
+    InitiatePaymentExceptionMessage:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        request:
+          $ref: "#/components/schemas/InitiatePayment"
