@@ -15,8 +15,4 @@ public class ProcessSuccess implements Event {
         return target;
     }
 
-    @Override
-    public String getType() {
-        return "processsuccess";
-    }
 }

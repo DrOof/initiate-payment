@@ -14,9 +14,4 @@ public class ProcessFailed implements Event {
     public ProcessInitiatePaymentTask getTarget() {
         return target;
     }
-
-    @Override
-    public String getType() {
-        return "processfailed";
-    }
 }

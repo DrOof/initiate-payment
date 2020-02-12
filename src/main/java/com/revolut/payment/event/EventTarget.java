@@ -35,7 +35,7 @@ public interface EventTarget<E extends Event> {
     default public void addEventListener( Class E, Object listener ) {
 
         if ( listeners.get( E ) == null ) {
-            listeners.put( E, new ArrayList<Object>() );
+            listeners.put( E, new ArrayList<>() );
         }
 
         listeners.get( E ).add( listener );
