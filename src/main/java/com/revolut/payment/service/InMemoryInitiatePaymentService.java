@@ -1,7 +1,6 @@
 package com.revolut.payment.service;
 
 import com.revolut.payment.exception.InitiatePaymentNotFoundException;
-import com.revolut.payment.exception.InitiatePaymentUnauthorizedException;
 import com.revolut.payment.model.InitiatePayment;
 import com.revolut.payment.exception.InitiatePaymentIsIdempotentException;
 import com.revolut.payment.task.ProcessFailed;
@@ -27,17 +26,17 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment create( String userId, InitiatePayment req ) throws InitiatePaymentIsIdempotentException {
+    public InitiatePayment create( String sub, InitiatePayment req ) throws InitiatePaymentIsIdempotentException {
 
-        if ( isIdempotentInitiatePayment( userId, req ) ) {
+        if ( isIdempotentInitiatePayment( sub, req ) ) {
             throw new InitiatePaymentIsIdempotentException( req );
         }
 
-        if ( queue.get( userId ) == null ) {
-            queue.put( userId, new LinkedList<>() );
+        if ( queue.get( sub ) == null ) {
+            queue.put( sub, new LinkedList<>() );
         }
 
-        queue.get( userId ).add( req );
+        queue.get( sub ).add( req );
         process( req );
 
         return req;
@@ -48,9 +47,9 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public List<InitiatePayment> read( String userId ) throws InitiatePaymentNotFoundException {
+    public List<InitiatePayment> read( String sub ) throws InitiatePaymentNotFoundException {
 
-        List<InitiatePayment> result = queue.get( userId );
+        List<InitiatePayment> result = queue.get( sub );
 
         if ( result == null ) {
             throw new InitiatePaymentNotFoundException( null );
@@ -63,17 +62,13 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment read( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
+    public InitiatePayment read( String sub, String id ) throws InitiatePaymentNotFoundException {
 
         InitiatePayment result = null;
         try {
-            result = queue.get( userId ).stream().filter( ( event ) -> event.getId().equals( id ) ).findFirst().get();
+            result = queue.get( sub ).stream().filter( ( p ) -> p.getId().equals( id ) ).findFirst().get();
         } catch ( NoSuchElementException e ) {
             throw new InitiatePaymentNotFoundException( result );
-        }
-
-        if ( !result.getUser().getSub().equals( userId ) ) {
-            throw new InitiatePaymentUnauthorizedException( result );
         }
 
         return result;
@@ -84,8 +79,8 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment update( String userId, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
-        return update( read( userId, id ), status );
+    public InitiatePayment update( String sub, String id, InitiatePayment.Status status ) throws InitiatePaymentNotFoundException {
+        return update( read( sub, id ), status );
     }
 
     /**
@@ -104,8 +99,8 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @inheritDoc
      */
     @Override
-    public InitiatePayment delete( String userId, String id ) throws InitiatePaymentNotFoundException, InitiatePaymentUnauthorizedException {
-        return delete( read( userId, id ) );
+    public InitiatePayment delete( String sub, String id ) throws InitiatePaymentNotFoundException {
+        return delete( read( sub, id ) );
     }
 
     /**
@@ -128,12 +123,12 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @param e
      * @return
      */
-    private boolean isIdempotentInitiatePayment( String userId, InitiatePayment e ) {
+    private boolean isIdempotentInitiatePayment( String sub, InitiatePayment e ) {
 
         List<InitiatePayment> results = null;
 
         try {
-            results = queue.get( userId ).stream()
+            results = queue.get( sub ).stream()
                     .filter( ( event ) -> e.isIdempotentInitiatePayment( event ) )
                     .collect( Collectors.toList() );
         } catch ( Exception ex ) {
