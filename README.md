@@ -2,7 +2,8 @@
 An initiate payment service
 
 ## Running
-`mvn compile exec:java -Dexec.mainClass=com.revolut.payment.app.InitiatePaymentApp`
+`mvn clean install` \
+`java -jar target/initiate-payment-1.0-SNAPSHOT.jar`
 
 ## Stack
 - Java 11 (LTS)
