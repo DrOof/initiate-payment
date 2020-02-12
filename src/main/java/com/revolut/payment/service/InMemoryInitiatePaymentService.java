@@ -86,7 +86,7 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
     /**
      * @inheritDoc
      */
-    public InitiatePayment update( InitiatePayment request, InitiatePayment.Status status ) {
+    private InitiatePayment update( InitiatePayment request, InitiatePayment.Status status ) {
 
         request.setStatus( status );
         process( request );
@@ -108,7 +108,7 @@ public class InMemoryInitiatePaymentService implements InitiatePaymentService {
      * @param request
      * @return
      */
-    public InitiatePayment delete( InitiatePayment request ) {
+    private InitiatePayment delete( InitiatePayment request ) {
 
         queue.get( request.getUser().getSub() ).remove( request );
         process( request );
